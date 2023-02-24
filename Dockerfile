@@ -1,4 +1,5 @@
-FROM golang:alpine
+# ======= build stage =======
+FROM golang:alpine as stage-build
 
 RUN apk update && apk add --no-cache git
 
@@ -20,4 +21,9 @@ RUN go mod download
 COPY . .
 RUN go build -o executable
 
-ENTRYPOINT ["./executable"]
+# ======= release stage =======
+FROM alpine:latest as stage-release
+
+COPY --from=stage-build /app/executable /
+
+ENTRYPOINT ["/executable"]
